@@ -20,10 +20,12 @@ import os
 class YOLO(object):
     _defaults = {
             # TODO remove abs path and make it relative
-            "model_path"      : '/home/breakthrough/universe/dev/github/detectron/model/model_data/coco/yolov3-coco.h5',
-            "anchors_path"    : '/home/breakthrough/universe/dev/github/detectron/detection/keras_yolo3/model_data'
-                                '/tiny_yolo_anchors.txt',
-            "classes_path"    : '/home/breakthrough/universe/dev/github/detectron/model/model_data/coco/coco_classes.txt',
+            "model_path"      : '/home/mash/universe/dev/github-runme/object_detection_demo/model/model_data/coco'
+                                '/yolov3-coco.h5',
+            "anchors_path"    : '/home/mash/universe/dev/github-runme/object_detection_demo/detection/keras_yolo3'
+                                '/model_data/tiny_yolo_anchors.txt',
+            "classes_path"    : '/home/mash/universe/dev/github-runme/object_detection_demo/model/model_data/coco'
+                                '/coco_classes.txt',
             "score"           : 0.3,
             "iou"             : 0.3,
             "model_image_size": (416, 416),
@@ -128,8 +130,8 @@ class YOLO(object):
         # print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
         
         font = ImageFont.truetype(
-                font='/home/breakthrough/universe/dev/bitbucket_plnar/deeplearning/models/object_detection'
-                     '/door_detection/keras_yolo3/font/FiraMono-Medium.otf',
+                font='/home/mash/universe/dev/github-runme/object_detection_demo/detection/keras_yolo3/font/FiraMono'
+                     '-Medium.otf',
                 size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
         
