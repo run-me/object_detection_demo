@@ -1,29 +1,62 @@
-import argparse
-from detection.keras_yolo3.yolo import YOLO, detect_video
+from model.model_factory.model_builder import get_model
 from PIL import Image
+from timeit import default_timer as timer
+import cv2
+import numpy as np
 
 
-def detect_img(yolo):
+def detect_video(yolo, video_path):
+    """
+        Helper function to get the object detection up and running
+    :param yolo: model object instance containing loaded model
+    :param video_path: path for the video source
+    :return: None
+    """
+    
+    vid = cv2.VideoCapture(video_path)
+    if not vid.isOpened():
+        raise IOError("Couldn't open webcam or video")
+    
+    accum_time = 0
+    curr_fps = 0
+    fps = "FPS: ??"
+    prev_time = timer()
+    count = 0
+    
     while True:
-        img = input('Input image filename:')
-        try:
-            image = Image.open(img)
-        except:
-            print('Open Error! Try again!')
-            continue
-        else:
-            r_image = yolo.detect_image(image)
-            r_image.show()
+        # capture image from the device/source
+        return_value, frame = vid.read()
+        image = Image.fromarray(frame)
+        image, preds = yolo.detect_image(image)
+        result = np.asarray(image)
+        curr_time = timer()
+        exec_time = curr_time - prev_time
+        prev_time = curr_time
+        accum_time = accum_time + exec_time
+        curr_fps = curr_fps + 1
+        if accum_time > 1:
+            accum_time = accum_time - 1
+            fps = "FPS: " + str(curr_fps)
+            curr_fps = 0
+        cv2.putText(result,
+                    text=fps,
+                    org=(3, 15),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=0.50,
+                    color=(0, 255, 0),
+                    thickness=2)
+        print(frame.shape)
+        cv2.namedWindow("result", cv2.WINDOW_NORMAL)
+        cv2.imshow("result", frame)
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        count += 1
     yolo.close_session()
 
 
-def img_infer(yolo, image):
-    r_image, yolo_pred = yolo.detect_image(image)
-    # yolo.close_session()
-    return r_image, yolo_pred
-
-
 if __name__ == '__main__':
-    vid_device = 0
-    yolo_model = YOLO()
-    detect_video(yolo_model, vid_device)
+    VID_DEVICE = 0
+    yolo_model = get_model('CocoYoloV3')
+    
+    detect_video(yolo_model, VID_DEVICE)

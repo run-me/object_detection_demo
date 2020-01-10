@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Class definition of YOLO_v3 style detection model on image and video
-"""
-
 import colorsys
 from timeit import default_timer as timer
 
@@ -10,40 +5,26 @@ import numpy as np
 from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
-from PIL import Image, ImageFont, ImageDraw
+from PIL import ImageFont, ImageDraw
 
-from .yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
+from model.backbone.model import yolo_eval, yolo_body, tiny_yolo_body
 from model.utils.utils import letterbox_image
 import os
 
 
 class YOLO(object):
-    _defaults = {
-            # TODO remove abs path and make it relative
-            "model_path"      : '/home/mash/universe/dev/github-runme/object_detection_demo/model/model_data/coco'
-                                '/yolov3-coco.h5',
-            "anchors_path"    : '/home/mash/universe/dev/github-runme/object_detection_demo/detection/keras_yolo3'
-                                '/model_data/tiny_yolo_anchors.txt',
-            "classes_path"    : '/home/mash/universe/dev/github-runme/object_detection_demo/model/model_data/coco'
-                                '/coco_classes.txt',
-            "score"           : 0.3,
-            "iou"             : 0.3,
-            "model_image_size": (416, 416),
-            "gpu_num"         : 0,
-            }
-    
-    @classmethod
-    def get_defaults(cls, n):
-        if n in cls._defaults:
-            return cls._defaults[n]
-        else:
-            return "Unrecognized attribute name '" + n + "'"
-    
     def __init__(self, **kwargs):
-        self.__dict__.update(self._defaults)  # set up default values
-        self.__dict__.update(kwargs)  # and update with user overrides
+        self.yolo_model = None
+        self.model_path = kwargs['model_path']
+        self.anchors_path = kwargs['anchors_path']
+        self.classes_path = kwargs['classes_path']
+        self.score = kwargs['score']
+        self.iou = kwargs['iou']
+        self.model_image_size = kwargs['model_image_size']
+        
         self.class_names = self._get_class()
         self.anchors = self._get_anchors()
+        
         self.sess = K.get_session()
         self.boxes, self.scores, self.classes = self.generate()
     
@@ -130,8 +111,7 @@ class YOLO(object):
         # print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
         
         font = ImageFont.truetype(
-                font='/home/mash/universe/dev/github-runme/object_detection_demo/detection/keras_yolo3/font/FiraMono'
-                     '-Medium.otf',
+                font='/home/mash/universe/dev/github-runme/object_detection_demo/model/utils/font/FiraMono-Medium.otf',
                 size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
         
@@ -175,43 +155,3 @@ class YOLO(object):
     
     def close_session(self):
         self.sess.close()
-
-
-def detect_video(yolo, video_path):
-    import cv2
-    vid = cv2.VideoCapture(video_path)
-    if not vid.isOpened():
-        raise IOError("Couldn't open webcam or video")
-    accum_time = 0
-    curr_fps = 0
-    fps = "FPS: ??"
-    prev_time = timer()
-    count = 0
-    while True:
-        return_value, frame = vid.read()
-        image = Image.fromarray(frame)
-        image, preds = yolo.detect_image(image)
-        result = np.asarray(image)
-        curr_time = timer()
-        exec_time = curr_time - prev_time
-        prev_time = curr_time
-        accum_time = accum_time + exec_time
-        curr_fps = curr_fps + 1
-        if accum_time > 1:
-            accum_time = accum_time - 1
-            fps = "FPS: " + str(curr_fps)
-            curr_fps = 0
-        cv2.putText(result,
-                    text=fps,
-                    org=(3, 15),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.50,
-                    color=(0, 255, 0),
-                    thickness=2)
-        cv2.namedWindow("result", cv2.WINDOW_NORMAL)
-        cv2.imshow("result", result)
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        count += 1
-    yolo.close_session()
