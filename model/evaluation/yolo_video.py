@@ -23,6 +23,7 @@ def detect_video(yolo, video_path):
     prev_time = timer()
     count = 0
     
+    # Keep iterating till user hits q
     while True:
         # capture image from the device/source
         return_value, frame = vid.read()
@@ -57,6 +58,8 @@ def detect_video(yolo, video_path):
 
 if __name__ == '__main__':
     VID_DEVICE = 0
+    
+    # Build model and get object reference
     yolo_model = get_model('CocoYoloV3')
     
     detect_video(yolo_model, VID_DEVICE)

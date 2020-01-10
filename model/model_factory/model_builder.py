@@ -1,3 +1,7 @@
+"""
+Builder pattern which builds the yolo instance to abstract complex
+object creation process
+"""
 from model.model_factory.yolo import YOLO
 
 
