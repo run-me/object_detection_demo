@@ -14,7 +14,7 @@ class CocoYoloV3:
         self.CLASSES_PATH = '/home/mash/universe/dev/github-runme/object_detection_demo/model/model_data/coco' \
                             '/coco_classes.txt'
         
-        self.SCORE = 0.1
+        self.SCORE = 0.3
         self.IOU = 0.3
         self.MODEL_IMAGE_SIZE = (416, 416)
     

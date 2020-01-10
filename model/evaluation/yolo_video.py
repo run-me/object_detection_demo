@@ -46,9 +46,8 @@ def detect_video(yolo, video_path):
                     fontScale=0.50,
                     color=(0, 255, 0),
                     thickness=2)
-        print(frame.shape)
         cv2.namedWindow("result", cv2.WINDOW_NORMAL)
-        cv2.imshow("result", frame)
+        cv2.imshow("result", result)
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
